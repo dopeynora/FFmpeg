@@ -684,7 +684,7 @@ static int mov_write_chan_tag(AVFormatContext *s, AVIOContext *pb, MOVTrack *tra
     layout_tag = ff_mov_get_channel_layout_tag(track->par->codec_id,
                                                track->par->channel_layout,
                                                &bitmap);
-    if (!layout_tag) {
+    if ((!layout_tag) && (!bitmap)) {
         av_log(s, AV_LOG_WARNING, "not writing 'chan' tag due to "
                "lack of channel information\n");
         return 0;
@@ -697,9 +697,78 @@ static int mov_write_chan_tag(AVFormatContext *s, AVIOContext *pb, MOVTrack *tra
     ffio_wfourcc(pb, "chan");   // Type
     avio_w8(pb, 0);             // Version
     avio_wb24(pb, 0);           // Flags
-    avio_wb32(pb, layout_tag);  // mChannelLayoutTag
-    avio_wb32(pb, bitmap);      // mChannelBitmap
-    avio_wb32(pb, 0);           // mNumberChannelDescriptions
+    avio_wb32(pb, 0);           // mChannelLayoutTag
+    avio_wb32(pb, 0);           // mChannelBitmap
+    
+    if (bitmap == AV_CH_FRONT_LEFT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 1);   // mChannelLabel
+    } else if (bitmap == AV_CH_FRONT_RIGHT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 2);   // mChannelLabel
+    } else if (bitmap == AV_CH_FRONT_CENTER) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 3);   // mChannelLabel
+    } else if (bitmap == AV_CH_LOW_FREQUENCY) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 4);   // mChannelLabel
+    } else if (bitmap == AV_CH_BACK_LEFT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 5);   // mChannelLabel
+    } else if (bitmap == AV_CH_BACK_RIGHT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 6);   // mChannelLabel
+    } else if (bitmap == AV_CH_FRONT_LEFT_OF_CENTER) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 7);   // mChannelLabel
+    } else if (bitmap == AV_CH_FRONT_RIGHT_OF_CENTER) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 8);   // mChannelLabel
+    } else if (bitmap == AV_CH_BACK_CENTER) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 9);   // mChannelLabel
+    } else if (bitmap == AV_CH_SIDE_LEFT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 10);  // mChannelLabel
+    } else if (bitmap == AV_CH_SIDE_RIGHT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 11);  // mChannelLabel
+    } else if (bitmap == AV_CH_TOP_CENTER) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 12);  // mChannelLabel
+    } else if (bitmap == AV_CH_TOP_FRONT_LEFT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 13);  // mChannelLabel
+    } else if (bitmap == AV_CH_TOP_FRONT_CENTER) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 14);  // mChannelLabel
+    } else if (bitmap == AV_CH_TOP_FRONT_RIGHT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 15);  // mChannelLabel
+    } else if (bitmap == AV_CH_TOP_BACK_LEFT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 16);  // mChannelLabel
+    } else if (bitmap == AV_CH_TOP_BACK_CENTER) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 17);  // mChannelLabel
+    } else if (bitmap == AV_CH_TOP_BACK_RIGHT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 18);  // mChannelLabel
+    } else if (bitmap == AV_CH_STEREO_LEFT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 38);  // mChannelLabel
+    } else if (bitmap == AV_CH_STEREO_RIGHT) {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 39);  // mChannelLabel
+    } else {
+        avio_wb32(pb, 1);   // mNumberChannelDescriptions
+        avio_wb32(pb, 1);   // mChannelLabel
+    }
+    
+    avio_wb32(pb, 0);       // mChannelFlags
+    avio_wb32(pb, 0);       // mCoordinates[0]
+    avio_wb32(pb, 0);       // mCoordinates[1]
+    avio_wb32(pb, 0);       // mCoordinates[2]
 
     return update_size(pb, pos);
 }

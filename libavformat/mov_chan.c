@@ -529,12 +529,15 @@ uint32_t ff_mov_get_channel_layout_tag(enum AVCodecID codec_id,
             if (layout_map[j].tag)
                 break;
         }
-        tag = layouts[i];
+        //tag = layouts[i];
     }
 
     /* if no tag was found, use channel bitmap as a backup if possible */
     if (tag == 0 && channel_layout > 0 && channel_layout < 0x40000) {
         tag     = MOV_CH_LAYOUT_USE_BITMAP;
+        *bitmap = (uint32_t)channel_layout;
+    } else if (tag == 0 && channel_layout > 0) {
+        tag     = MOV_CH_LAYOUT_USE_DESCRIPTIONS;
         *bitmap = (uint32_t)channel_layout;
     } else
         *bitmap = 0;
